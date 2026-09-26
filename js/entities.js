@@ -53,7 +53,7 @@ const World = {
   },
 
   spawnEnemy(type, x) {
-    if (this.enemies.length >= 40) return;
+    if (this.enemies.length >= 70) return;
     const def = CFG.enemies[type];
     const hp = def.hp * Game.hpMul();
     this.enemies.push({
