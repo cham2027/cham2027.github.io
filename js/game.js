@@ -35,14 +35,14 @@ const Game = {
 
   hpMul() {
     if (this.mode === "endless") {
-      let m = Math.pow(1.1, Math.floor(this.time / 20));
-      if (this.time >= 60) {
-        m *= 2.4;
-        m *= Math.pow(1.14, Math.floor((this.time - 60) / 12));
-      }
+      if (this.time < 60) return 0.38;
+      let m = 2.4 * Math.pow(1.1, Math.floor(this.time / 20));
+      m *= Math.pow(1.14, Math.floor((this.time - 60) / 12));
       return m;
     }
-    return CFG.chapters[this.chapter - 1].hp;
+    const ch = CFG.chapters[this.chapter - 1].hp;
+    if (this.chapter === 1 && this.time < 60) return ch * 0.45;
+    return ch;
   },
 
   bulletMul() {
