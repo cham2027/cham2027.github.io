@@ -226,7 +226,7 @@ const Bosses = {
       const h = b.hazards[i];
       if (!h.hot) continue;
       if (distToSeg(p.x, p.y, h.x1, h.y1, h.x2, h.y2) <= h.width + pr * 0.35) {
-        Player.hurt(20);
+        Player.hurt(28);
         return;
       }
     }
@@ -267,7 +267,7 @@ const Bosses = {
       friendly: false,
       fromBoss: true,
       color: "#FFB15A",
-      hurt: 20,
+      hurt: 28,
     });
   },
 
@@ -289,13 +289,14 @@ const Bosses = {
     b.y += (b.homeY - b.y) * Math.min(1, dt * 2);
     b.shootT -= dt;
     if (b.shootT <= 0) {
-      b.shootT = 1.1;
-      this.fan(b, 3, 0.22, 200);
+      b.shootT = 0.7;
+      this.fan(b, 5, 0.16, 240);
     }
     b.aimT -= dt;
     if (b.aimT <= 0) {
-      b.aimT = 2.2;
-      this.aimed(b, 220);
+      b.aimT = 1.3;
+      this.aimed(b, 280);
+      this.aimed(b, 240);
     }
   },
 
@@ -309,23 +310,30 @@ const Bosses = {
       b.shootT -= dt;
       b.aimT -= dt;
       b.addT -= dt;
-      if (b.shootT <= 0) { b.shootT = 1.1; this.fan(b, 3, 0.22, 200); }
-      if (b.aimT <= 0) { b.aimT = 2.2; this.aimed(b, 230); }
+      if (b.shootT <= 0) { b.shootT = 0.65; this.fan(b, 5, 0.16, 250); }
+      if (b.aimT <= 0) {
+        b.aimT = 1.15;
+        const p = World.player;
+        const ang = Math.atan2(p.y - b.y, p.x - b.x);
+        this.shot(b.x, b.y + 10, ang, 300, 6);
+        this.shot(b.x, b.y + 10, ang - 0.2, 270, 6);
+        this.shot(b.x, b.y + 10, ang + 0.2, 270, 6);
+      }
       if (b.addT <= 0) {
-        b.addT = 8;
-        World.spawnEnemy("E1", 90);
-        World.spawnEnemy("E1", 450);
+        b.addT = 5;
+        World.spawnEnemy("E2", 90);
+        World.spawnEnemy("E2", 450);
       }
     } else if (b.phase === 2) {
       this.sweep(b, dt);
       if (b.sweep.mode === "rest") {
         b.shootT -= dt;
-        if (b.shootT <= 0) { b.shootT = 0.85; this.fan(b, 3, 0.18, 180); }
+        if (b.shootT <= 0) { b.shootT = 0.5; this.fan(b, 5, 0.15, 230); }
       }
     } else {
       if (b.ram.mode === "wait") {
         b.shootT -= dt;
-        if (b.shootT <= 0) { b.shootT = 0.7; this.fan(b, 5, 0.18, 210); }
+        if (b.shootT <= 0) { b.shootT = 0.42; this.fan(b, 7, 0.14, 260); }
       }
       this.ram(b, dt);
     }
@@ -361,7 +369,7 @@ const Bosses = {
       x2: b.x + Math.cos(ang) * len,
       y2: b.y + Math.sin(ang) * len,
       hot: hot,
-      width: hot ? 16 : 2,
+      width: hot ? 22 : 2,
       color: hot ? "#FF5A36" : "#FFD56A",
     });
   },
@@ -370,7 +378,7 @@ const Bosses = {
     const r = b.ram;
     if (r.mode === "wait") {
       r.t += dt;
-      if (r.t >= 7) {
+      if (r.t >= 3.6) {
         r.mode = "tele";
         r.t = 0;
         r.tx = World.player.x;
@@ -407,18 +415,18 @@ const Bosses = {
   },
 
   scriptB(b, dt) {
-    b.orbit += dt * 0.55;
+    b.orbit += dt * 0.85;
     b.y += (150 - b.y) * Math.min(1, dt * 2);
     if (b.phase === 1) {
       b.shootT -= dt;
       if (b.shootT <= 0) {
-        b.shootT = 1.4;
-        let n = 12;
-        b.points.forEach(function (p) { if (p.dead) n -= 4; });
-        n = Math.max(0, n);
+        b.shootT = 0.85;
+        let n = 16;
+        b.points.forEach(function (p) { if (p.dead) n -= 3; });
+        n = Math.max(8, n);
         for (let i = 0; i < n; i++) {
           const ang = b.orbit + (i / Math.max(1, n)) * Math.PI * 2;
-          this.shot(b.x + Math.cos(ang) * b.outer, b.y + Math.sin(ang) * b.outer, ang, 170, 6);
+          this.shot(b.x + Math.cos(ang) * b.outer, b.y + Math.sin(ang) * b.outer, ang, 200, 6);
         }
       }
     } else if (b.phase === 2) {
@@ -426,25 +434,25 @@ const Bosses = {
       if (b.blink > 0) {
         b.blink -= dt;
         if (b.blink <= 0) b.safe = (b.safe + 1) % 4;
-      } else if (b.laneT >= 3) {
+      } else if (b.laneT >= 2.1) {
         b.laneT = 0;
-        b.blink = 0.5;
+        b.blink = 0.4;
       }
       b.laneShot -= dt;
       if (b.laneShot <= 0) {
-        b.laneShot = 0.34;
+        b.laneShot = 0.2;
         for (let i = 0; i < 4; i++) {
           if (i === b.safe) continue;
-          const x = i * 135 + 30 + Math.random() * 75;
-          this.shot(x, -10, Math.PI / 2, 165, 7);
+          const x = i * 135 + 24 + Math.random() * 86;
+          this.shot(x, -10, Math.PI / 2, 200, 7);
         }
       }
       b.aimT -= dt;
       if (b.aimT <= 0) {
-        b.aimT = 2;
-        for (let i = 0; i < 8; i++) {
-          const ang = b.orbit + (i / 8) * Math.PI * 2;
-          this.shot(b.x, b.y, ang, 140, 5);
+        b.aimT = 1.15;
+        for (let i = 0; i < 12; i++) {
+          const ang = b.orbit + (i / 12) * Math.PI * 2;
+          this.shot(b.x, b.y, ang, 170, 5);
         }
       }
     } else {
@@ -455,19 +463,19 @@ const Bosses = {
       b.coreY = clamp(b.coreY, 280, 620);
       b.shootT -= dt;
       if (b.shootT <= 0) {
-        b.shootT = 0.9;
-        const a1 = Math.atan2(p.y - b.coreY, p.x - 16 - b.coreX);
-        const a2 = Math.atan2(p.y - b.coreY, p.x + 16 - b.coreX);
-        this.shot(b.coreX, b.coreY, a1, 240, 6);
-        this.shot(b.coreX, b.coreY, a2, 240, 6);
+        b.shootT = 0.5;
+        const mid = Math.atan2(p.y - b.coreY, p.x - b.coreX);
+        this.shot(b.coreX, b.coreY, mid, 280, 6);
+        this.shot(b.coreX, b.coreY, mid - 0.16, 260, 6);
+        this.shot(b.coreX, b.coreY, mid + 0.16, 260, 6);
       }
       b.aimT -= dt;
       if (b.aimT <= 0) {
-        b.aimT = 2;
-        for (let i = 0; i < 10; i++) {
-          const ang = b.orbit + (i / 10) * Math.PI * 2;
-          if (i % 3 === 0) continue;
-          this.shot(b.x, b.y, ang, 110, 11);
+        b.aimT = 1.2;
+        for (let i = 0; i < 14; i++) {
+          const ang = b.orbit + (i / 14) * Math.PI * 2;
+          if (i % 4 === 0) continue;
+          this.shot(b.x, b.y, ang, 140, 11);
         }
       }
     }
@@ -480,22 +488,23 @@ const Bosses = {
       b.look = Math.atan2(p.y - b.y, p.x - b.x);
       b.shootT -= dt;
       if (b.shootT <= 0) {
-        b.shootT = 0.8;
+        b.shootT = 0.48;
         const mid = Math.atan2(p.y - b.y, p.x - b.x);
-        for (let i = -2; i <= 2; i++) this.shot(b.x, b.y, mid + i * 0.12, 230, 5);
+        for (let i = -3; i <= 3; i++) this.shot(b.x, b.y, mid + i * 0.1, 270, 5);
       }
       this.blades(b, dt);
     } else if (b.phase === 2) {
       b.lid = 0;
       b.spiralAcc += dt;
-      while (b.spiralAcc >= 0.125) {
-        b.spiralAcc -= 0.125;
-        b.spin += 0.38;
-        this.shot(b.x, b.y, b.spin, 155, 5);
+      while (b.spiralAcc >= 0.07) {
+        b.spiralAcc -= 0.07;
+        b.spin += 0.32;
+        this.shot(b.x, b.y, b.spin, 175, 5);
+        this.shot(b.x, b.y, b.spin + Math.PI, 175, 5);
       }
       b.orbT -= dt;
       if (b.orbT <= 0) {
-        b.orbT = 3;
+        b.orbT = 2.1;
         const base = 80 + Math.random() * 40;
         for (let i = 0; i < 3; i++) {
           this.shot(base + i * 155, b.y + 30, Math.PI / 2, 78, 26);
@@ -517,7 +526,7 @@ const Bosses = {
         if (b.blinkT <= 0) {
           this.radialFire(b);
           b.blinkMode = "wait";
-          b.blinkT = 5;
+          b.blinkT = 3.1;
         }
       }
     }
@@ -528,7 +537,7 @@ const Bosses = {
     if (s.mode === "wait") {
       s.t += dt;
       b.lid = 0;
-      if (s.t >= 6) { s.mode = "close"; s.t = 0; }
+      if (s.t >= 3.4) { s.mode = "close"; s.t = 0; }
     } else if (s.mode === "close") {
       s.t += dt;
       b.lid = clamp(s.t / 0.5, 0, 1);
@@ -570,7 +579,7 @@ const Bosses = {
   radialFire(b) {
     const center = this.safeCenter(b);
     const half = (50 * Math.PI) / 180 / 2;
-    for (let ang = 0; ang < Math.PI * 2; ang += (8 * Math.PI) / 180) {
+    for (let ang = 0; ang < Math.PI * 2; ang += (6 * Math.PI) / 180) {
       if (Math.abs(angDiff(ang, center)) < half) continue;
       this.shot(b.x, b.y, ang, 210, 5);
     }
