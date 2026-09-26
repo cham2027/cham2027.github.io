@@ -35,13 +35,13 @@ const Game = {
 
   hpMul() {
     if (this.mode === "endless") {
-      if (this.time < 60) return 0.38;
+      if (this.time < 60) return 0.22;
       let m = 2.4 * Math.pow(1.1, Math.floor(this.time / 20));
       m *= Math.pow(1.14, Math.floor((this.time - 60) / 12));
       return m;
     }
     const ch = CFG.chapters[this.chapter - 1].hp;
-    if (this.chapter === 1 && this.time < 60) return ch * 0.45;
+    if (this.chapter === 1 && this.time < 60) return ch * 0.26;
     return ch;
   },
 
