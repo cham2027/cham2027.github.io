@@ -56,11 +56,11 @@ const CFG = {
   },
   shipOrder: ["falcon", "prism", "rail"],
   enemies: {
-    E1: { name: "侦察机", hp: 180, vy: 250, r: 14, score: 100, shoot: 0 },
-    E2: { name: "枪手", hp: 320, vy: 78, r: 16, score: 200, shoot: 0.85 },
-    E3: { name: "散射舰", hp: 400, vy: 96, r: 18, score: 260, shoot: 1.1 },
-    E4: { name: "游走者", hp: 360, vy: 88, r: 16, score: 240, shoot: 1.0 },
-    E5: { name: "浮游炮台", hp: 520, vy: 120, r: 20, score: 320, shoot: 0.55 },
+    E1: { name: "侦察机", hp: 180, vy: 145, r: 14, score: 100, shoot: 0 },
+    E2: { name: "枪手", hp: 320, vy: 58, r: 16, score: 200, shoot: 0.85 },
+    E3: { name: "散射舰", hp: 400, vy: 70, r: 18, score: 260, shoot: 1.1 },
+    E4: { name: "游走者", hp: 360, vy: 64, r: 16, score: 240, shoot: 1.0 },
+    E5: { name: "浮游炮台", hp: 520, vy: 88, r: 20, score: 320, shoot: 0.55 },
     EL: { name: "精英·刺蜂", hp: 1500, vy: 0, r: 24, score: 800, shoot: 0.45 },
   },
   chapters: [
