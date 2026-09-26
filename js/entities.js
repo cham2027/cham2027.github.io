@@ -387,19 +387,23 @@ const World = {
 
   drop(e) {
     const r = Math.random();
+    const late = Game.time >= 60;
     if (e.type === "E1") {
-      if (r < 0.08) this.spawnPickup(e.x, e.y, "coin", 50);
+      if (late && r < 0.16) this.spawnPickup(e.x, e.y, "heal");
+      else if (r < 0.08) this.spawnPickup(e.x, e.y, "coin", 50);
     } else if (e.type === "E2" || e.type === "E3") {
-      if (r < 0.12) this.spawnPickup(e.x, e.y, "coin", 50);
+      if (late && r < 0.2) this.spawnPickup(e.x, e.y, "heal");
+      else if (r < 0.12) this.spawnPickup(e.x, e.y, "coin", 50);
       else if (r < 0.18) this.spawnPickup(e.x, e.y, "power");
     } else if (e.type === "E4" || e.type === "E5") {
       if (r < 0.1) this.spawnPickup(e.x, e.y, "coin", 50);
-      else if (r < 0.18) this.spawnPickup(e.x, e.y, Math.random() < 0.5 ? "heal" : "shield");
+      else if (r < (late ? 0.32 : 0.22)) this.spawnPickup(e.x, e.y, "heal");
+      else if (r < (late ? 0.4 : 0.28)) this.spawnPickup(e.x, e.y, "shield");
       if (e.type === "E5" && Math.random() < 0.12) this.spawnPickup(e.x, e.y + 12, "wing");
     } else if (e.type === "EL") {
-      this.spawnPickup(e.x, e.y, Math.random() < 0.5 ? "power" : "shield");
+      this.spawnPickup(e.x, e.y, late ? "heal" : (Math.random() < 0.5 ? "power" : "shield"));
       if (Math.random() < 0.55) this.spawnPickup(e.x + 16, e.y, "wing");
-      if (Math.random() < 0.35) this.spawnPickup(e.x - 16, e.y + 8, "power");
+      if (late || Math.random() < 0.45) this.spawnPickup(e.x - 16, e.y + 8, "heal");
     }
   },
 
