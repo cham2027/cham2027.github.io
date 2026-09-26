@@ -321,6 +321,30 @@ ol .empty { list-style: none; margin-left: -22px; color: var(--muted); }
   font-size: 11px;
 }
 #btn-skill.ready { box-shadow: 0 0 16px rgba(255, 61, 138, 0.45); border-color: var(--pink); }
+#btn-bomb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+#btn-bomb.ready {
+  box-shadow: 0 0 16px rgba(255, 213, 106, 0.45);
+  border-color: var(--gold);
+}
+#pulse-bar {
+  display: block;
+  width: 86%;
+  height: 4px;
+  background: #172233;
+  overflow: hidden;
+}
+#pulse-fill {
+  display: block;
+  height: 100%;
+  width: 35%;
+  background: linear-gradient(90deg, #ffd56a, #fff4c2);
+}
 
 .levelup-wrap { text-align: center; }
 #cards { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }

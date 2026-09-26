@@ -7,10 +7,10 @@ const Player = {
       hp: 100,
       iframe: 0,
       weapon: 1,
-      bombs: 1,
-      bombMax: 3,
+      pulse: 35,
       shields: 0,
-      wingmen: 0,
+      wings: [],
+      wingCd: [0, 0, 0, 0],
       revives: 0,
       skillCd: 0,
       skillT: 0,
@@ -59,9 +59,44 @@ const Player = {
     p.magnetT = Math.max(0, p.magnetT - dt);
     p.flash = Math.max(0, p.flash - dt);
     p.focus = Input.focusDown();
+    this.gainPulse(CFG.combat.pulseFill * dt);
     this.move(dt);
     this.shoot(dt);
     if (p.beamT > 0) this.beam(dt);
+  },
+
+  gainPulse(n) {
+    const p = World.player;
+    if (!p) return;
+    p.pulse = clamp(p.pulse + n, 0, 100);
+  },
+
+  addWing() {
+    const p = World.player;
+    const n = p.wings.length;
+    if (n >= 4) return false;
+    let kind = "strike";
+    if (n === 1) kind = "spray";
+    else if (n === 2) kind = Math.random() < 0.5 ? "spray" : "homing";
+    else if (n === 3) kind = ["strike", "spray", "homing"][Math.floor(Math.random() * 3)];
+    p.wings.push(kind);
+    return kind;
+  },
+
+  wingName(kind) {
+    if (kind === "spray") return "散射";
+    if (kind === "homing") return "追踪";
+    return "突击";
+  },
+
+  wingPos(i) {
+    const slots = [
+      { x: -34, y: 16 },
+      { x: 34, y: 16 },
+      { x: -56, y: 4 },
+      { x: 56, y: 4 },
+    ];
+    return slots[i] || slots[0];
   },
 
   move(dt) {
@@ -160,26 +195,7 @@ const Player = {
       }
     }
 
-    if (p.wingmen > 0) {
-      p.wingT -= dt;
-      if (p.wingT <= 0) {
-        p.wingT = 0.25;
-        for (let i = 0; i < p.wingmen; i++) {
-          const ox = i === 0 ? -34 : 34;
-          World.fireBullet({
-            x: p.x + ox,
-            y: p.y + 8,
-            vx: 0,
-            vy: -640,
-            r: 3,
-            dmg: 6 * mul,
-            friendly: true,
-            color: "#FF7AB6",
-            bounce: p.up.bounce ? 1 : 0,
-          });
-        }
-      }
-    }
+    this.fireWings(dt, mul, p);
 
     if (p.up.side) {
       p.sideT -= dt;
@@ -187,6 +203,40 @@ const Player = {
         p.sideT = 2;
         this.shot(p, -0.55, 480, 20 * mul, 4, false);
         this.shot(p, 0.55, 480, 20 * mul, 4, false);
+      }
+    }
+  },
+
+  fireWings(dt, mul, p) {
+    const bounce = p.up.bounce ? 1 : 0;
+    for (let i = 0; i < p.wings.length; i++) {
+      p.wingCd[i] = (p.wingCd[i] || 0) - dt;
+      if (p.wingCd[i] > 0) continue;
+      const pos = this.wingPos(i);
+      const kind = p.wings[i];
+      const x = p.x + pos.x;
+      const y = p.y + pos.y;
+      if (kind === "spray") {
+        p.wingCd[i] = 0.34;
+        for (let k = -1; k <= 1; k++) {
+          const a = -Math.PI / 2 + k * 0.22;
+          World.fireBullet({
+            x: x, y: y, vx: Math.cos(a) * 620, vy: Math.sin(a) * 620,
+            r: 3, dmg: 5 * mul, friendly: true, color: "#7AFFF6", bounce: bounce,
+          });
+        }
+      } else if (kind === "homing") {
+        p.wingCd[i] = 0.46;
+        World.fireBullet({
+          x: x, y: y, vx: 0, vy: -420,
+          r: 4, dmg: 11 * mul, friendly: true, homing: true, color: "#FFE08A", bounce: bounce,
+        });
+      } else {
+        p.wingCd[i] = 0.22;
+        World.fireBullet({
+          x: x, y: y, vx: 0, vy: -680,
+          r: 3, dmg: 7 * mul, friendly: true, color: "#FF7AB6", bounce: bounce,
+        });
       }
     }
   },
@@ -243,17 +293,22 @@ const Player = {
   },
 
   bomb() {
+    this.pulse();
+  },
+
+  pulse() {
     const p = World.player;
-    if (!p || p.bombs <= 0) return;
+    if (!p || p.pulse < 100) return;
     if (Game.screen !== "play") return;
     if (Game.phase === "bonus" || Game.phase === "dying") return;
-    p.bombs -= 1;
+    p.pulse = 0;
+    const extra = p.up.pulse ? 1.25 : 1;
     World.clearEnemyBullets();
-    for (let i = 0; i < World.enemies.length; i++) World.damageEnemy(World.enemies[i], CFG.combat.bombDmg);
-    if (Bosses.current) Bosses.hurt(CFG.combat.bombBoss);
-    p.iframe = Math.max(p.iframe, CFG.combat.bombIframe);
-    World.burst(p.x, p.y, "#FFD56A", 28);
-    Game.shake(0.16);
+    for (let i = 0; i < World.enemies.length; i++) World.damageEnemy(World.enemies[i], CFG.combat.pulseDmg * extra);
+    if (Bosses.current) Bosses.hurt(CFG.combat.pulseBoss * extra);
+    p.iframe = Math.max(p.iframe, CFG.combat.pulseIframe);
+    World.burst(p.x, p.y, "#FFD56A", 32);
+    Game.shake(0.18);
     Sfx.explode();
     Sfx.skill();
   },
@@ -338,14 +393,6 @@ const Player = {
         p.shields += 1;
         World.floatText(p.x, p.y - 20, "护盾", "#3DFFF2");
       }
-    } else if (it.kind === "bomb") {
-      if (p.bombs >= p.bombMax) {
-        Game.addRawScore(300);
-        World.floatText(p.x, p.y - 20, "+300", "#FFD56A");
-      } else {
-        p.bombs += 1;
-        World.floatText(p.x, p.y - 20, "炸弹", "#FF5A36");
-      }
     } else if (it.kind === "heal") {
       p.hp = Math.min(100, p.hp + 30);
       World.floatText(p.x, p.y - 20, "+30", "#8DFFB0");
@@ -353,12 +400,12 @@ const Player = {
       p.magnetT = CFG.combat.magnetTime + p.magnetBonus;
       World.floatText(p.x, p.y - 20, "磁铁", "#FFD56A");
     } else if (it.kind === "wing") {
-      if (p.wingmen >= 2) {
+      const kind = this.addWing();
+      if (!kind) {
         Game.addRawScore(800);
         World.floatText(p.x, p.y - 20, "+800", "#FFD56A");
       } else {
-        p.wingmen += 1;
-        World.floatText(p.x, p.y - 20, "僚机", "#FF3D8A");
+        World.floatText(p.x, p.y - 20, this.wingName(kind) + "僚", "#FF3D8A");
       }
     }
   },

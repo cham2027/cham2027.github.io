@@ -34,7 +34,7 @@ const Game = {
   last: 0,
 
   hpMul() {
-    if (this.mode === "endless") return Math.pow(1.08, Math.floor(this.time / 30));
+    if (this.mode === "endless") return Math.pow(1.06, Math.floor(this.time / 25));
     return CFG.chapters[this.chapter - 1].hp;
   },
 
@@ -61,6 +61,8 @@ const Game = {
     if (p && p.focus) mult *= p.up.focus ? 2 : 1.5;
     const gain = Math.round(base * mult);
     this.score += gain;
+    Player.gainPulse(CFG.combat.pulseKill);
+    if (this.combo > 0 && this.combo % 10 === 0) Player.gainPulse(CFG.combat.pulseCombo);
     if (x != null) World.floatText(x, y, "+" + gain, "#FFD56A");
   },
 
@@ -92,7 +94,7 @@ const Game = {
     Save.load();
     Sfx.on = Save.data.sound;
     this.shakeOn = Save.data.shake;
-    this.shipPick = Save.unlocked(Save.data.lastShip) ? Save.data.lastShip : "falcon";
+    this.shipPick = CFG.ships[Save.data.lastShip] ? Save.data.lastShip : "falcon";
     this.showcaseShip = this.shipPick;
     Render.init();
     Input.bind(document.getElementById("stage"));
@@ -250,7 +252,7 @@ const Game = {
   afterCombat(dt) {
     if (this.phase !== "waves" || this.screen !== "play") return;
     if (this.mode === "endless") {
-      const miniDue = Math.floor(this.time / 180);
+      const miniDue = this.time < 120 ? 0 : 1 + Math.floor((this.time - 120) / 150);
       if (miniDue > this.miniMark && this.grace <= 0) {
         this.miniMark = miniDue;
         this.phase = "boss";
@@ -259,14 +261,16 @@ const Game = {
         this.bannerT = 1.3;
         return;
       }
-      const eliteDue = Math.floor(this.time / 90);
+      const eliteDue = this.time < 50 ? 0 : 1 + Math.floor((this.time - 50) / 70);
       if (eliteDue > this.eliteMark && this.grace <= 0) {
         this.eliteMark = eliteDue;
         World.spawnEnemy("EL", 200 + Math.random() * 140);
       }
+      const pickGap = this.firstPick ? 35 : 25;
       this.levelupAcc += dt;
-      if (this.levelupAcc >= 40 && this.phase === "waves") {
+      if (this.levelupAcc >= pickGap && this.phase === "waves") {
         this.levelupAcc = 0;
+        this.firstPick = true;
         this.openLevelup("endless");
       }
       return;
@@ -296,14 +300,14 @@ const Game = {
     if (this.phase !== "bonus") return;
     if (this.doPayout) {
       const p = World.player;
-      this.payout = Math.round(p.hp) * 10 + p.bombs * 500;
+      this.payout = Math.round(p.hp) * 10 + Math.round((p.pulse / 100) * 300);
       this.score += this.payout;
       const before = Save.data.cleared;
       Save.data.cleared = Math.max(before, this.chapter);
       Save.store();
       this.justUnlocked = "";
-      if (this.chapter === 1 && before < 1) this.justUnlocked = "已解锁战机「棱镜」";
-      if (this.chapter === 2 && before < 2) this.justUnlocked = "已解锁战机「磁轨」";
+      if (this.chapter === 1 && before < 1) this.justUnlocked = "第 1 章已记入进度";
+      if (this.chapter === 2 && before < 2) this.justUnlocked = "第 2 章已记入进度";
       if (this.chapter >= 3) this.showResult("victory");
       else this.showResult("chapter");
     } else {
@@ -347,6 +351,7 @@ const Game = {
     this.phase = "waves";
     this.grace = 0.8;
     this.levelupAcc = 0;
+    this.firstPick = false;
     this.eliteMark = 0;
     this.miniMark = 0;
     this.payout = 0;
@@ -358,6 +363,7 @@ const Game = {
     Save.data.lastShip = this.shipPick;
     Save.store();
     if (this.mode === "campaign") Waves.start(1, 0);
+    else Waves.resetEndless();
     this.banner = this.mode === "endless" ? "无尽突入" : CFG.chapters[0].name;
     this.bannerT = 1.6;
     this.show("play");
@@ -371,7 +377,7 @@ const Game = {
     this.grace = 0.8;
     const p = World.player;
     p.hp = 100;
-    p.bombs = Math.max(p.bombs, 1);
+    p.pulse = Math.max(p.pulse, 40);
     p.iframe = 1.2;
     p.x = 270;
     p.y = 760;
@@ -470,7 +476,7 @@ const Game = {
     if (this.mode === "endless") bits.push("存活 " + this.formatTime(this.time));
     else if (this.where === "boss" || this.where === "bonus") bits.push("第 " + this.chapter + " 章 · Boss");
     else bits.push("第 " + this.chapter + " 章 · 波次 " + (this.wave + 1));
-    if (this.payout) bits.push("耐久与炸弹结算 +" + this.payout);
+    if (this.payout) bits.push("耐久与脉冲结算 +" + this.payout);
     if (this.record) bits.push("刷新了本机纪录");
     lines.innerHTML = bits.map(function (t) { return "<li>" + t + "</li>"; }).join("");
     extra.textContent = this.justUnlocked || "";
@@ -510,8 +516,12 @@ const Game = {
     for (let i = 0; i < p.shields; i++) shields += "盾 ";
     document.getElementById("shields").textContent = shields;
     document.getElementById("lives").textContent = p.revives > 0 ? "复活 1" : "";
-    document.getElementById("bomb-count").textContent = String(p.bombs);
-    document.getElementById("weapon-lv").textContent = "火力 Lv." + p.weapon;
+    const pulsePct = Math.floor(p.pulse);
+    document.getElementById("bomb-count").textContent = pulsePct + "%";
+    document.getElementById("pulse-fill").style.width = pulsePct + "%";
+    document.getElementById("btn-bomb").classList.toggle("ready", p.pulse >= 100);
+    const wingTxt = p.wings.length ? " · 僚机 " + p.wings.length + "/4" : "";
+    document.getElementById("weapon-lv").textContent = "火力 Lv." + p.weapon + wingTxt;
     const ship = CFG.ships[p.ship];
     document.getElementById("skill-name").textContent = ship.skill;
     const cd = document.getElementById("skill-cd");
@@ -581,24 +591,23 @@ const Game = {
   renderHangar() {
     const id = this.shipPick;
     const ship = CFG.ships[id];
-    const ok = Save.unlocked(id);
     document.getElementById("ship-name").textContent = ship.name;
     document.getElementById("ship-blurb").textContent = ship.blurb;
     document.getElementById("ship-skill").textContent = ship.skill + "：" + ship.skillDesc;
     document.getElementById("ship-unlock").textContent = ship.unlockText;
-    document.getElementById("ship-lock").classList.toggle("hidden", ok);
+    document.getElementById("ship-lock").classList.add("hidden");
     const go = document.getElementById("ship-go");
     if (!this.hangarPlay) {
       go.classList.add("hidden");
     } else {
       go.classList.remove("hidden");
-      go.disabled = !ok;
-      go.textContent = ok ? "出击" : "未解锁";
+      go.disabled = false;
+      go.textContent = "出击";
     }
   },
 
   confirmShip() {
-    if (!this.hangarPlay || !Save.unlocked(this.shipPick)) return;
+    if (!this.hangarPlay) return;
     this.startRun();
   },
 

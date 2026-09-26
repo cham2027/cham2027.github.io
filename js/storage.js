@@ -24,8 +24,8 @@ const Save = {
       localStorage.setItem(this.key, JSON.stringify(this.data));
     } catch (e) {}
   },
-  unlocked(id) {
-    return this.data.cleared >= CFG.ships[id].unlock;
+  unlocked() {
+    return true;
   },
   best(mode) {
     const list = this.data.scores[mode] || [];

@@ -155,9 +155,11 @@ const Render = {
       ctx.arc(p.x, p.y, 32, 0, Math.PI * 2);
       ctx.stroke();
     }
-    for (let i = 0; i < p.wingmen; i++) {
-      const ox = i === 0 ? -34 : 34;
-      this.ship(ctx, "falcon", p.x + ox, p.y + 16, 0.45, false, "#FF7AB6");
+    const wings = p.wings || [];
+    for (let i = 0; i < wings.length; i++) {
+      const pos = Player.wingPos(i);
+      const tint = wings[i] === "spray" ? "#7AFFF6" : wings[i] === "homing" ? "#FFE08A" : "#FF7AB6";
+      this.ship(ctx, "falcon", p.x + pos.x, p.y + pos.y, 0.42, false, tint);
     }
     this.ship(ctx, p.ship, p.x, p.y, 1, !p.alive);
     const hr = p.focus ? 3 : 2;

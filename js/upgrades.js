@@ -54,9 +54,8 @@ const Upgrades = {
       return;
     }
     p.up[card.id] = (p.up[card.id] || 0) + 1;
-    if (card.id === "bombcap") {
-      p.bombMax += 1;
-      p.bombs = Math.min(p.bombMax, p.bombs + 1);
+    if (card.id === "pulse") {
+      p.pulse = 100;
     } else if (card.id === "revive") {
       if (p.revives < 1) p.revives += 1;
       else p.hp = Math.min(100, p.hp + 50);

@@ -390,15 +390,15 @@ const World = {
       if (r < 0.08) this.spawnPickup(e.x, e.y, "coin", 50);
     } else if (e.type === "E2" || e.type === "E3") {
       if (r < 0.12) this.spawnPickup(e.x, e.y, "coin", 50);
-      else if (r < 0.16) this.spawnPickup(e.x, e.y, "power");
+      else if (r < 0.18) this.spawnPickup(e.x, e.y, "power");
     } else if (e.type === "E4" || e.type === "E5") {
       if (r < 0.1) this.spawnPickup(e.x, e.y, "coin", 50);
-      else if (r < 0.16) this.spawnPickup(e.x, e.y, Math.random() < 0.5 ? "heal" : "shield");
-      if (e.type === "E5" && Math.random() < 0.08) this.spawnPickup(e.x, e.y + 12, "wing");
+      else if (r < 0.18) this.spawnPickup(e.x, e.y, Math.random() < 0.5 ? "heal" : "shield");
+      if (e.type === "E5" && Math.random() < 0.12) this.spawnPickup(e.x, e.y + 12, "wing");
     } else if (e.type === "EL") {
       this.spawnPickup(e.x, e.y, Math.random() < 0.5 ? "power" : "shield");
-      if (Math.random() < 0.5) this.spawnPickup(e.x + 16, e.y, "bomb");
-      if (Math.random() < 0.4) this.spawnPickup(e.x - 16, e.y + 8, "wing");
+      if (Math.random() < 0.55) this.spawnPickup(e.x + 16, e.y, "wing");
+      if (Math.random() < 0.35) this.spawnPickup(e.x - 16, e.y + 8, "power");
     }
   },
 

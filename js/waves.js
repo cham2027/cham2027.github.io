@@ -4,6 +4,7 @@ const Waves = {
   time: 0,
   done: false,
   acc: 0,
+  burstN: 0,
 
   start(chapter, wave) {
     const ch = CFG.chapters[chapter - 1];
@@ -44,19 +45,38 @@ const Waves = {
     return 48 + Math.random() * (CFG.W - 96);
   },
 
+  resetEndless() {
+    this.acc = 0;
+    this.burstN = 0;
+    this.time = 0;
+  },
+
   updateEndless(dt) {
     if (Game.grace > 0) return;
-    const mul = Math.max(0.45, Math.pow(0.96, Math.floor(Game.time / 30)));
-    const interval = 1.15 * mul;
+    this.time += dt;
+    if (this.burstN < 8) {
+      this.acc += dt;
+      if (this.acc >= 0.28) {
+        this.acc = 0;
+        World.spawnEnemy(this.burstN < 5 ? "E1" : "E2", 48 + Math.random() * (CFG.W - 96));
+        this.burstN += 1;
+      }
+      return;
+    }
+    const grow = Math.min(1, Game.time / 90);
+    const interval = 0.55 + grow * 0.3;
     this.acc += dt;
     if (this.acc < interval) return;
     this.acc = 0;
+    World.spawnEnemy(this.endlessType(), 48 + Math.random() * (CFG.W - 96));
+  },
+
+  endlessType() {
     const t = Game.time;
-    let types = ["E1", "E1", "E2"];
-    if (t > 30) types = ["E1", "E2", "E2", "E3"];
-    if (t > 60) types = ["E2", "E3", "E4", "E4"];
-    if (t > 100) types = ["E3", "E4", "E5", "E2"];
-    const type = types[Math.floor(Math.random() * types.length)];
-    World.spawnEnemy(type, 48 + Math.random() * (CFG.W - 96));
+    let types = ["E1", "E1", "E2", "E2"];
+    if (t > 15) types = ["E1", "E2", "E2", "E3"];
+    if (t > 35) types = ["E2", "E3", "E3", "E4"];
+    if (t > 55) types = ["E3", "E4", "E5", "E2"];
+    return types[Math.floor(Math.random() * types.length)];
   },
 };
