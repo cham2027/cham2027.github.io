@@ -145,7 +145,7 @@ const World = {
   moveEnemy(e, dt, p) {
     if (e.type === "E4") {
       e.y += e.vy * dt;
-      e.x = clamp(e.baseX + Math.sin(e.age * 2.3) * 78, 30, 510);
+      e.x = clamp(e.baseX + Math.sin(e.age * 1.6) * 52, 30, 510);
       return;
     }
     if (e.type === "E5") {
@@ -160,7 +160,7 @@ const World = {
         e.x += Math.sin(e.age * 1.4) * 28 * dt;
         if (e.hoverT >= 8) {
           e.mode = "leave";
-          e.vy = 260;
+          e.vy = 170;
         }
       } else {
         e.y += e.vy * dt;
@@ -169,7 +169,7 @@ const World = {
     }
     if (e.type === "EL") {
       if (e.mode === "enter") {
-        e.y += 180 * dt;
+        e.y += 120 * dt;
         if (e.y >= 150) {
           e.y = 150;
           e.mode = "idle";
@@ -191,8 +191,8 @@ const World = {
         if (e.wind <= 0) {
           e.mode = "dash";
           const a = Math.atan2(e.ty - e.y, e.tx - e.x);
-          e.vx = Math.cos(a) * 540;
-          e.vy = Math.sin(a) * 540;
+          e.vx = Math.cos(a) * 360;
+          e.vy = Math.sin(a) * 360;
           e.dashLen = 0.4;
         }
       } else if (e.mode === "dash") {
