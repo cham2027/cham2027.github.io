@@ -39,7 +39,7 @@ const World = {
     b.hits = spec.pierce ? new Set() : null;
     b.life = spec.life == null ? 5 : spec.life;
     b.color = spec.color || "#7AFFF6";
-    b.hurt = spec.hurt == null ? 15 : spec.hurt;
+    b.hurt = spec.hurt == null ? 20 : spec.hurt;
     b.fromBoss = !!spec.fromBoss;
     b.vulnApply = !!spec.vulnApply;
     b.alive = true;
@@ -71,7 +71,7 @@ const World = {
       mode: "enter",
       hoverY: 230 + Math.random() * 110,
       hoverT: 0,
-      dashT: 2.2,
+      dashT: 1.6,
       wind: 0,
       alive: true,
       flash: 0,
@@ -205,7 +205,7 @@ const World = {
         e.x += (270 - e.x) * Math.min(1, dt * 2);
         if (Math.abs(e.y - 155) < 10) {
           e.mode = "idle";
-          e.dashT = 4;
+          e.dashT = 3;
         }
       }
       e.x = clamp(e.x, 28, 512);
@@ -223,17 +223,18 @@ const World = {
     if (e.shootT > 0) return;
     e.shootT = gap;
     const mul = Game.bulletMul();
+    const spd = CFG.combat.enemyBullet;
     if (e.type === "E3") {
-      for (let i = -1; i <= 1; i++) {
-        const a = Math.PI / 2 + i * 0.28;
-        this.enemyShot(e.x, e.y + 8, a, 185 * mul, 5, false);
+      for (let i = -2; i <= 2; i++) {
+        const a = Math.PI / 2 + i * 0.2;
+        this.enemyShot(e.x, e.y + 8, a, 185 * mul * spd, 5, false);
       }
     } else if (e.type === "EL") {
-      this.enemyShot(e.x - 12, e.y + 10, Math.PI / 2, 230 * mul, 5, false);
-      this.enemyShot(e.x + 12, e.y + 10, Math.PI / 2, 230 * mul, 5, false);
+      this.enemyShot(e.x - 12, e.y + 10, Math.PI / 2, 230 * mul * spd, 5, false);
+      this.enemyShot(e.x + 12, e.y + 10, Math.PI / 2, 230 * mul * spd, 5, false);
     } else {
       const a = Math.atan2(p.y - e.y, p.x - e.x);
-      this.enemyShot(e.x, e.y + 6, a, (e.type === "E5" ? 230 : 205) * mul, 5, false);
+      this.enemyShot(e.x, e.y + 6, a, (e.type === "E5" ? 230 : 205) * mul * spd, 5, false);
     }
   },
 
@@ -247,7 +248,7 @@ const World = {
       friendly: false,
       fromBoss: fromBoss,
       color: fromBoss ? "#FFB15A" : "#FF4D8D",
-      hurt: 15,
+      hurt: 20,
     });
   },
 
@@ -359,7 +360,7 @@ const World = {
         const ang = Math.atan2(p.y - e.y, p.x - e.x);
         p.x = clamp(p.x + Math.cos(ang) * 36, CFG.player.minX, CFG.player.maxX);
         p.y = clamp(p.y + Math.sin(ang) * 36, CFG.player.minY, CFG.player.maxY);
-        Player.hurt(25);
+        Player.hurt(e.type === "E1" ? 35 : 30);
       }
     }
 

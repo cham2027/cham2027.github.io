@@ -222,20 +222,20 @@ const Player = {
           const a = -Math.PI / 2 + k * 0.22;
           World.fireBullet({
             x: x, y: y, vx: Math.cos(a) * 620, vy: Math.sin(a) * 620,
-            r: 3, dmg: 5 * mul, friendly: true, color: "#7AFFF6", bounce: bounce,
+            r: 3, dmg: 4 * mul, friendly: true, color: "#7AFFF6", bounce: bounce,
           });
         }
       } else if (kind === "homing") {
         p.wingCd[i] = 0.46;
         World.fireBullet({
           x: x, y: y, vx: 0, vy: -420,
-          r: 4, dmg: 11 * mul, friendly: true, homing: true, color: "#FFE08A", bounce: bounce,
+          r: 4, dmg: 8 * mul, friendly: true, homing: true, color: "#FFE08A", bounce: bounce,
         });
       } else {
         p.wingCd[i] = 0.22;
         World.fireBullet({
           x: x, y: y, vx: 0, vy: -680,
-          r: 3, dmg: 7 * mul, friendly: true, color: "#FF7AB6", bounce: bounce,
+          r: 3, dmg: 5 * mul, friendly: true, color: "#FF7AB6", bounce: bounce,
         });
       }
     }

@@ -34,7 +34,7 @@ const Game = {
   last: 0,
 
   hpMul() {
-    if (this.mode === "endless") return Math.pow(1.06, Math.floor(this.time / 25));
+    if (this.mode === "endless") return Math.pow(1.1, Math.floor(this.time / 20));
     return CFG.chapters[this.chapter - 1].hp;
   },
 

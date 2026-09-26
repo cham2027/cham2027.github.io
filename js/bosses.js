@@ -226,7 +226,7 @@ const Bosses = {
       const h = b.hazards[i];
       if (!h.hot) continue;
       if (distToSeg(p.x, p.y, h.x1, h.y1, h.x2, h.y2) <= h.width + pr * 0.35) {
-        Player.hurt(15);
+        Player.hurt(20);
         return;
       }
     }
@@ -238,16 +238,16 @@ const Bosses = {
     if (!b || b.introT > 0) return;
     if (b.id === "B" && b.phase < 3) {
       const d = dist(p.x, p.y, b.x, b.y);
-      if (d < b.outer + pr && d > b.inner - pr) Player.hurt(40);
+      if (d < b.outer + pr && d > b.inner - pr) Player.hurt(50);
       return;
     }
     if (b.id === "B" && b.phase === 3) {
-      if (dist(p.x, p.y, b.coreX, b.coreY) < 34 + pr) Player.hurt(40);
+      if (dist(p.x, p.y, b.coreX, b.coreY) < 34 + pr) Player.hurt(50);
       const d = dist(p.x, p.y, b.x, b.y);
-      if (d < b.outer + pr && d > b.inner - pr) Player.hurt(40);
+      if (d < b.outer + pr && d > b.inner - pr) Player.hurt(50);
       return;
     }
-    if (dist(p.x, p.y, b.x, b.y) < (b.body || 80) * 0.72 + pr) Player.hurt(40);
+    if (dist(p.x, p.y, b.x, b.y) < (b.body || 80) * 0.72 + pr) Player.hurt(50);
   },
 
   pointPos(b, i) {
@@ -257,7 +257,7 @@ const Bosses = {
   },
 
   shot(x, y, ang, speed, r) {
-    const mul = Game.bulletMul();
+    const mul = Game.bulletMul() * (CFG.combat.enemyBullet || 1);
     World.fireBullet({
       x: x,
       y: y,
@@ -267,7 +267,7 @@ const Bosses = {
       friendly: false,
       fromBoss: true,
       color: "#FFB15A",
-      hurt: 15,
+      hurt: 20,
     });
   },
 

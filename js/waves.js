@@ -63,8 +63,7 @@ const Waves = {
       }
       return;
     }
-    const grow = Math.min(1, Game.time / 90);
-    const interval = 0.55 + grow * 0.3;
+    const interval = 0.5 + Math.min(0.1, Game.time / 180);
     this.acc += dt;
     if (this.acc < interval) return;
     this.acc = 0;
