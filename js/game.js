@@ -234,6 +234,11 @@ const Game = {
     if (edge.bomb) Player.bomb();
     if (edge.skill) Player.skill();
     if (!World.player.alive) return;
+    if (this.needStartPick) {
+      this.needStartPick = false;
+      this.openLevelup("start");
+      return;
+    }
 
     if (this.phase === "waves") {
       if (this.mode === "campaign") Waves.update(dt);
@@ -273,12 +278,22 @@ const Game = {
         this.eliteMark = eliteDue;
         World.spawnEnemy("EL", 200 + Math.random() * 140);
       }
-      const pickGap = this.firstPick ? 35 : 25;
-      this.levelupAcc += dt;
-      if (this.levelupAcc >= pickGap && this.phase === "waves") {
-        this.levelupAcc = 0;
-        this.firstPick = true;
-        this.openLevelup("endless");
+      if (this.time >= 60) {
+        this.healRain += dt;
+        if (this.healRain >= 6.5) {
+          this.healRain = 0;
+          World.spawnPickup(rand(60, 480), -12, "heal");
+        }
+      }
+      if (this.pickCount < 3) {
+        const due = this.pickCount === 1 ? 20 : 40;
+        if (this.time >= due) this.openLevelup("endless");
+      } else {
+        this.levelupAcc += dt;
+        if (this.levelupAcc >= 35) {
+          this.levelupAcc = 0;
+          this.openLevelup("endless");
+        }
       }
       return;
     }
@@ -359,6 +374,9 @@ const Game = {
     this.grace = 0.8;
     this.levelupAcc = 0;
     this.firstPick = false;
+    this.pickCount = 0;
+    this.needStartPick = true;
+    this.healRain = 0;
     this.eliteMark = 0;
     this.miniMark = 0;
     this.payout = 0;
@@ -367,6 +385,8 @@ const Game = {
     this.justUnlocked = "";
     World.reset();
     World.player = Player.make(this.shipPick);
+    Player.addWing();
+    Player.addWing();
     Save.data.lastShip = this.shipPick;
     Save.store();
     if (this.mode === "campaign") Waves.start(1, 0);
@@ -429,6 +449,7 @@ const Game = {
     if (!card) return;
     Upgrades.apply(card);
     Sfx.ui();
+    this.pickCount = (this.pickCount || 0) + 1;
     if (this.levelReason === "wave") {
       this.wave += 1;
       Waves.start(this.chapter, this.wave);
