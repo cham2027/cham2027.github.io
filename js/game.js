@@ -34,12 +34,19 @@ const Game = {
   last: 0,
 
   hpMul() {
-    if (this.mode === "endless") return Math.pow(1.1, Math.floor(this.time / 20));
+    if (this.mode === "endless") {
+      let m = Math.pow(1.1, Math.floor(this.time / 20));
+      if (this.time >= 60) {
+        m *= 2.4;
+        m *= Math.pow(1.14, Math.floor((this.time - 60) / 12));
+      }
+      return m;
+    }
     return CFG.chapters[this.chapter - 1].hp;
   },
 
   bulletMul() {
-    if (this.mode === "endless") return 1;
+    if (this.mode === "endless") return this.time >= 60 ? 1.2 : 1;
     return CFG.chapters[this.chapter - 1].bullet;
   },
 
