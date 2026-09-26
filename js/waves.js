@@ -63,11 +63,18 @@ const Waves = {
       }
       return;
     }
-    const interval = 0.5 + Math.min(0.1, Game.time / 180);
+    let interval = 0.5 + Math.min(0.1, Game.time / 180);
+    let n = 1;
+    if (Game.time >= 60) {
+      interval = Game.time >= 90 ? 0.22 : 0.3;
+      n = Game.time >= 90 ? 3 : 2;
+    }
     this.acc += dt;
     if (this.acc < interval) return;
     this.acc = 0;
-    World.spawnEnemy(this.endlessType(), 48 + Math.random() * (CFG.W - 96));
+    for (let i = 0; i < n; i++) {
+      World.spawnEnemy(this.endlessType(), 40 + Math.random() * (CFG.W - 80));
+    }
   },
 
   endlessType() {
