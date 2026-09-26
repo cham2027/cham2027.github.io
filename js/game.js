@@ -258,7 +258,26 @@ const Game = {
     World.updateFx(dt);
 
     if (!World.player.alive) return;
+    this.dropEarlyWings();
     this.afterCombat(dt);
+  },
+
+  dropEarlyWings() {
+    if (this.time >= 60) return;
+    const p = World.player;
+    if (!p) return;
+    if (this.time >= 8 && this.wingDrops < 1) {
+      World.spawnPickup(rand(140, 400), -10, "wing");
+      this.wingDrops = 1;
+    }
+    if (this.time >= 24 && this.wingDrops < 2) {
+      World.spawnPickup(rand(140, 400), -10, "wing");
+      this.wingDrops = 2;
+    }
+    if (this.time >= 42 && p.wings.length < 2 && this.wingDrops < 4) {
+      World.spawnPickup(rand(140, 400), -10, "wing");
+      this.wingDrops += 1;
+    }
   },
 
   afterCombat(dt) {
@@ -377,6 +396,7 @@ const Game = {
     this.pickCount = 0;
     this.needStartPick = true;
     this.healRain = 0;
+    this.wingDrops = 0;
     this.eliteMark = 0;
     this.miniMark = 0;
     this.payout = 0;
@@ -385,8 +405,6 @@ const Game = {
     this.justUnlocked = "";
     World.reset();
     World.player = Player.make(this.shipPick);
-    Player.addWing();
-    Player.addWing();
     Save.data.lastShip = this.shipPick;
     Save.store();
     if (this.mode === "campaign") Waves.start(1, 0);
