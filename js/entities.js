@@ -87,7 +87,7 @@ const World = {
       y: y,
       kind: kind,
       value: value || 50,
-      vy: kind === "coin" && value === 100 ? 150 : 86,
+      vy: kind === "wing" ? 58 : (kind === "coin" && value === 100 ? 150 : 86),
       alive: true,
     });
   },
