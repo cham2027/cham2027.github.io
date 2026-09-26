@@ -59,7 +59,7 @@ const Player = {
     p.magnetT = Math.max(0, p.magnetT - dt);
     p.flash = Math.max(0, p.flash - dt);
     p.focus = Input.focusDown();
-    this.gainPulse(CFG.combat.pulseFill * dt);
+    this.gainPulse(CFG.combat.pulseFill * dt * (p.up.pulse ? 1.25 : 1));
     this.move(dt);
     this.shoot(dt);
     if (p.beamT > 0) this.beam(dt);
@@ -302,14 +302,8 @@ const Player = {
     if (Game.screen !== "play") return;
     if (Game.phase === "bonus" || Game.phase === "dying") return;
     p.pulse = 0;
-    const extra = p.up.pulse ? 1.25 : 1;
     World.clearEnemyBullets();
-    for (let i = 0; i < World.enemies.length; i++) World.damageEnemy(World.enemies[i], CFG.combat.pulseDmg * extra);
-    if (Bosses.current) Bosses.hurt(CFG.combat.pulseBoss * extra);
-    p.iframe = Math.max(p.iframe, CFG.combat.pulseIframe);
-    World.burst(p.x, p.y, "#FFD56A", 32);
-    Game.shake(0.18);
-    Sfx.explode();
+    World.burst(p.x, p.y, "#7AFFF6", 18);
     Sfx.skill();
   },
 
