@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>星澜：霓虹截击</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="layout">
+  <aside id="side-left" class="side">
+    <div class="side-kicker">NEON INTERCEPT</div>
+    <h2>星澜</h2>
+    <p id="side-chapter">竖版科幻空战</p>
+    <p class="side-note">拖动战机躲开弹幕，火力会在这一局里越打越强。</p>
+  </aside>
+
+  <div id="frame">
+    <div id="stage">
+      <canvas id="cv" width="540" height="960"></canvas>
+
+      <div id="hud" class="hidden">
+        <div class="hud-top">
+          <button id="btn-pause" type="button">暂停</button>
+          <div class="hud-mid">
+            <div id="chapter-label">第 1 章</div>
+            <div id="bossbox" class="hidden">
+              <div id="bossname">Boss</div>
+              <div class="segs" id="segs"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+          <div class="scorebox">
+            <div id="score">0</div>
+            <div id="combo"></div>
+          </div>
+        </div>
+        <div class="hp-row">
+          <div class="hp"><span id="hpbar"></span></div>
+          <div id="shields"></div>
+          <div id="lives"></div>
+        </div>
+        <div id="banner"></div>
+        <div id="weapon-lv">火力 Lv.1</div>
+        <div class="hud-bottom">
+          <button id="btn-bomb" type="button">炸弹 <b id="bomb-count">1</b></button>
+          <button id="btn-focus" type="button">集中</button>
+          <button id="btn-skill" type="button"><span id="skill-name">技能</span><small id="skill-cd"></small></button>
+        </div>
+      </div>
+
+      <section id="screen-menu" class="screen">
+        <div class="titles">
+          <div class="kicker">NEON INTERCEPT</div>
+          <h1>星澜</h1>
+          <p class="lead">拖动移动 · 自动射击</p>
+        </div>
+        <div class="panel menu-panel">
+          <button id="go-start" class="primary" type="button">开始游戏</button>
+          <button id="go-hangar" type="button">机库</button>
+          <button id="go-scores" type="button">最高分</button>
+          <button id="go-settings" type="button">设置</button>
+        </div>
+      </section>
+
+      <section id="screen-mode" class="screen hidden">
+        <div class="panel">
+          <div class="kicker">选择模式</div>
+          <button id="mode-campaign" class="mode-card" type="button">
+            <strong>闯关</strong>
+            <span>三章连打，每章一个大 Boss</span>
+            <em id="mode-clear">进度 0/3</em>
+          </button>
+          <button id="mode-endless" class="mode-card" type="button">
+            <strong>无尽</strong>
+            <span>活得越久，分数越高</span>
+            <em id="mode-best">最高分 0</em>
+          </button>
+          <button id="mode-back" class="ghost" type="button">返回</button>
+        </div>
+      </section>
+
+      <section id="screen-hangar" class="screen hidden">
+        <div class="panel hangar-panel">
+          <div class="kicker">机库</div>
+          <div class="hangar-nav">
+            <button id="ship-prev" type="button">◀</button>
+            <div>
+              <h2 id="ship-name">游隼</h2>
+              <p id="ship-lock" class="lock hidden">未解锁</p>
+            </div>
+            <button id="ship-next" type="button">▶</button>
+          </div>
+          <p id="ship-blurb"></p>
+          <p id="ship-skill"></p>
+          <p id="ship-unlock" class="hint"></p>
+          <button id="ship-go" class="primary" type="button">出击</button>
+          <button id="hangar-back" class="ghost" type="button">返回</button>
+        </div>
+      </section>
+
+      <section id="screen-scores" class="screen hidden">
+        <div class="panel">
+          <div class="kicker">本机纪录</div>
+          <h2>最高分</h2>
+          <h3>闯关</h3>
+          <ol id="list-campaign"></ol>
+          <h3>无尽</h3>
+          <ol id="list-endless"></ol>
+          <button id="scores-back" class="ghost" type="button">返回</button>
+        </div>
+      </section>
+
+      <section id="screen-settings" class="screen hidden">
+        <div class="panel">
+          <div class="kicker">设置</div>
+          <button id="toggle-sound" type="button">音效：开</button>
+          <button id="toggle-shake" type="button">震动：开</button>
+          <p class="hint">纪录和设置保存在这台电脑的浏览器里。</p>
+          <button id="settings-back" class="ghost" type="button">返回</button>
+        </div>
+      </section>
+
+      <section id="screen-levelup" class="screen hidden">
+        <div class="levelup-wrap">
+          <div class="kicker">波次完成</div>
+          <h2>选择强化</h2>
+          <p class="hint">只在本局生效 · 键盘 1 / 2 / 3</p>
+          <div id="cards"></div>
+        </div>
+      </section>
+
+      <section id="screen-pause" class="screen hidden">
+        <div class="panel">
+          <div class="kicker">已暂停</div>
+          <button id="resume" class="primary" type="button">继续</button>
+          <button id="restart" type="button">重新开始</button>
+          <button id="pause-menu" class="ghost" type="button">返回主菜单</button>
+        </div>
+      </section>
+
+      <section id="screen-result" class="screen hidden">
+        <div class="panel">
+          <div class="kicker" id="result-kicker">结算</div>
+          <h2 id="result-title">战斗结束</h2>
+          <div id="result-score">0</div>
+          <ul id="result-lines"></ul>
+          <p id="result-extra" class="hint"></p>
+          <button id="result-next" class="primary hidden" type="button">进入下一章</button>
+          <button id="result-again" class="primary" type="button">再来一局</button>
+          <button id="result-menu" class="ghost" type="button">返回主菜单</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <aside id="side-right" class="side">
+    <div class="side-kicker">操作</div>
+    <ul class="helps">
+      <li>拖动，或 WASD 移动</li>
+      <li>按住 Shift，或按住「集中」</li>
+      <li>J 或空格：炸弹</li>
+      <li>K：主动技能</li>
+      <li>Esc：暂停</li>
+    </ul>
+    <p class="side-note">飞机中心的小光点才是会受伤的位置，看起来擦到边不一定掉血。</p>
+  </aside>
+</div>
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/player.js"></script>
+<script src="js/upgrades.js"></script>
+<script src="js/waves.js"></script>
+<script src="js/bosses.js"></script>
+<script src="js/render.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
